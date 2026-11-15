@@ -81,3 +81,8 @@ CONFIG_MUSE_STATIC_BUFFERS_IN_PSRAM=y
 # actually slept, and how long each power lock kept the chip awake.
 CONFIG_PM_LIGHT_SLEEP_CALLBACKS=y
 CONFIG_PM_PROFILING=y
+
+# Mugi: camera.capture とホイールのダブルクリック撮影を有効化する
+CONFIG_MUSE_WATCHER_CAMERA=y
+# Mugi: 字幕の日本語表示（GNU Unifont、約 1.2 MB の flash を使用）
+CONFIG_MUSE_CJK_FONT=y
