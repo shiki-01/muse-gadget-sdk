@@ -36,6 +36,8 @@ option(MUSE_SIM_FETCH_DEPS
        ON)
 option(MUSE_SIM_SANITIZERS "Build the simulator with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(MUSE_SIM_WARNINGS_AS_ERRORS "Treat simulator warnings as errors" OFF)
+# Mugi: 実機の CONFIG_MUSE_CJK_FONT=y と同じく、字幕の日本語表示を確認するためのオプション
+option(MUSE_SIM_CJK_FONT "Build the simulator with the CJK caption font (CONFIG_MUSE_CJK_FONT)" OFF)
 
 set(MUSE_SIM_LVGL_VERSION "9.5.0")
 set(MUSE_SIM_SDL_MIN_VERSION "2.0.18")
@@ -186,6 +188,11 @@ target_link_libraries(muse_simulator PRIVATE
 )
 
 target_link_libraries(muse_simulator PRIVATE m)
+
+if(MUSE_SIM_CJK_FONT)
+    target_sources(muse_simulator PRIVATE "${MUSE_COMPONENT_DIR}/fonts/muse_font_cjk_16.c")
+    target_compile_definitions(muse_simulator PRIVATE CONFIG_MUSE_CJK_FONT=1)
+endif()
 
 if(APPLE)
     # SDL's Cocoa display and screensaver backends use IOKit even when its
