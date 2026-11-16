@@ -21,6 +21,9 @@
 #include <stdatomic.h>
 
 #include "esp_wifi.h"
+#if CONFIG_MUGI_WIFI_ENTERPRISE
+#include "mugi_wifi_enterprise.h"
+#endif
 #include "esp_event.h"
 #include "esp_netif.h"
 #include "esp_log.h"
@@ -362,6 +365,11 @@ bool wifi_mgr_connect(const char *ssid, const char *password, int timeout_ms) {
     portEXIT_CRITICAL(&s_join_lock);
     s_reconnect_backoff_ms = RECONNECT_BACKOFF_MIN_MS;
     xEventGroupClearBits(s_events, BIT_CONNECTED | BIT_FAIL | BIT_GOT_IP);
+
+#if CONFIG_MUGI_WIFI_ENTERPRISE
+    // Mugi: 802.1X 用の SSID なら EAP を設定して有効化し、それ以外なら無効化する。
+    if (mugi_wifi_enterprise_prepare(ssid) != ESP_OK) goto done;
+#endif
 
     // esp_wifi_set_config returns ESP_ERR_WIFI_STATE while the STA is still
     // tearing down a prior association; poll briefly instead of failing the

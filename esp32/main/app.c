@@ -50,6 +50,9 @@
 #include "config_store.h"
 #include "wifi_mgr.h"
 #include "wifi_known.h"
+#if CONFIG_MUGI_WIFI_ENTERPRISE
+#include "mugi_wifi_enterprise.h"
+#endif
 #include "customer_product_info.h"
 #include "ble_coex.h"
 #if CONFIG_HOMEHUB_BLE_COMMANDS
@@ -462,6 +465,31 @@ static int find_saved_network(const wifi_known_list_t *list, const char *ssid) {
     }
     return -1;
 }
+
+#if CONFIG_MUGI_WIFI_ENTERPRISE
+// Mugi: 802.1X 用の SSID を保存済みネットワークに加える。Muse アプリの Wi-Fi 設定では
+// 802.1X の認証情報を入力できないため、ファームウェア側で登録する。認証情報は
+// wifi_mgr_connect() が SSID を見て設定するので、ここでは SSID だけを保存する。
+// すでに保存済みなら何もしない。新規追加は先頭に入るため、元の先頭を入れ直して順序を保つ。
+static void seed_enterprise_network(void) {
+    const char *ssid = mugi_wifi_enterprise_ssid();
+    wifi_known_list_t *list = malloc(sizeof(*list));
+    if (!ssid || !list) {
+        free(list);
+        return;
+    }
+    wifi_known_load(list);
+    if (find_saved_network(list, ssid) < 0) {
+        if (!wifi_known_remember(ssid, "", 0)) {
+            ESP_LOGW(TAG, "failed to save the 802.1X network %s", ssid);
+        } else if (list->count > 0) {
+            wifi_known_remember(list->nets[0].ssid, list->nets[0].password, -1);
+        }
+    }
+    wifi_known_wipe(list);
+    free(list);
+}
+#endif
 
 // Joins saved network k. The one joined goes first in the list, so it's tried
 // first next time and its channel is the one saved. hidden: whether the scan
@@ -2706,6 +2734,9 @@ void app_run(void) {
 
     config_store_init();
     wifi_known_init();
+#if CONFIG_MUGI_WIFI_ENTERPRISE
+    seed_enterprise_network();
+#endif
 
 #if CONFIG_ESP_HOSTED_ENABLED
     wifi_mgr_init();   /* identity_init() reads the STA MAC from the coprocessor */

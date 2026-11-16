@@ -52,3 +52,7 @@ __pycache__/
 .gradle/
 .idea/
 local.properties
+
+# Mugi: ローカルの認証情報（.example は除く）
+devices/sdkconfig.local-*
+!devices/sdkconfig.local-*.example

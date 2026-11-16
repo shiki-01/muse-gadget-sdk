@@ -1,0 +1,14 @@
+# Mugi: 愛工大 Wi-Fi (802.1X) 用のローカル設定の雛形。
+# このファイルを devices/sdkconfig.local-ait にコピーして値を入れる。
+# コピー先は .gitignore 済みで、コミットしない。認証情報をこのファイルに書かない。
+#
+# ビルド例:
+#   idf.py -B build-watcher -DIDF_TARGET=esp32s3 -DSDKCONFIG=build-watcher/sdkconfig \
+#     -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;devices/sdkconfig.muse;devices/sdkconfig.muse-sensecap-watcher;devices/sdkconfig.local-ait" build
+CONFIG_MUGI_WIFI_ENTERPRISE=y
+CONFIG_MUGI_EAP_SSID="ait-wnet1x"
+CONFIG_MUGI_EAP_USERNAME="your-ait-id"
+CONFIG_MUGI_EAP_PASSWORD="your-password"
+CONFIG_MUGI_EAP_SERVER_DOMAIN="authadapter1.aitech.ac.jp"
+# 発行 CA を特定したら PEM のパスを指定する（空なら ESP-IDF の証明書バンドルを使う）。
+CONFIG_MUGI_EAP_CA_CERT_PATH=""

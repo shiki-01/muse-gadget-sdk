@@ -1,0 +1,68 @@
+menu "Mugi WPA2-Enterprise"
+
+    config MUGI_WIFI_ENTERPRISE
+        bool "Join a WPA2-Enterprise (PEAP/MSCHAPV2) network"
+        default n
+        help
+            Adds 802.1X EAP (PEAP, phase 2 MSCHAPV2) for one SSID. The SSID
+            is added to the saved networks at boot, so the normal join flow
+            picks it when it is in range. Pair the gadget on a PSK network
+            first: the Muse app's Wi-Fi setup cannot enter 802.1X credentials.
+
+            Keep the credentials in a gitignored overlay
+            (devices/sdkconfig.local-ait; see the .example next to it), never in
+            a committed file.
+
+    config MUGI_EAP_SSID
+        string "802.1X network SSID"
+        depends on MUGI_WIFI_ENTERPRISE
+        default ""
+
+    config MUGI_EAP_USERNAME
+        string "EAP username (phase 2 identity)"
+        depends on MUGI_WIFI_ENTERPRISE
+        default ""
+
+    config MUGI_EAP_PASSWORD
+        string "EAP password"
+        depends on MUGI_WIFI_ENTERPRISE
+        default ""
+        help
+            Stored in plain text in the generated sdkconfig and in the app
+            image's flash. Don't share the build directory or the binary.
+
+    config MUGI_EAP_ANON_IDENTITY
+        string "EAP outer (anonymous) identity"
+        depends on MUGI_WIFI_ENTERPRISE
+        default ""
+        help
+            Sent in the clear before the tunnel is up. Empty uses the
+            username, which some networks require.
+
+    config MUGI_EAP_SERVER_DOMAIN
+        string "RADIUS server certificate domain to match"
+        depends on MUGI_WIFI_ENTERPRISE
+        default ""
+        help
+            The name the server certificate has to carry. Empty skips the
+            check, which weakens server authentication.
+
+    config MUGI_EAP_CA_CERT_PATH
+        string "CA certificate (PEM) to verify the server with"
+        depends on MUGI_WIFI_ENTERPRISE
+        default ""
+        help
+            Path to a PEM file, relative to the project directory. Empty
+            uses ESP-IDF's root certificate bundle (esp_crt_bundle), which
+            holds the common public roots only.
+
+    config MUGI_EAP_DISABLE_TIME_CHECK
+        bool "Ignore the certificate validity dates"
+        depends on MUGI_WIFI_ENTERPRISE
+        default y
+        help
+            The gadget has no clock until it is online (no RTC battery), so
+            a date check would reject the server certificate at every boot.
+            The CA and the domain are still checked.
+
+endmenu
